@@ -66,8 +66,7 @@ class KNearestNeighbor(object):
         dists = np.zeros((num_test, num_train))
         for i in xrange(num_test):
             for j in xrange(num_train):
-                dist = np.sqrt(np.power(X[i, :] - self.X_train[j, :], 2).sum())
-                dists[i, j] = dist
+                dists[i, j] = np.sqrt(np.power(X[i] - self.X_train[j, :], 2).sum())
         return dists
 
     def compute_distances_one_loop(self, X):
@@ -86,7 +85,7 @@ class KNearestNeighbor(object):
             # Compute the l2 distance between the ith test point and all training #
             # points, and store the result in dists[i, :].                        #
             #######################################################################
-            pass
+            dists[i, :] = np.sqrt(np.power(self.X_train - X[i], 2).sum(axis=1))
             #######################################################################
             #                         END OF YOUR CODE                            #
             #######################################################################
