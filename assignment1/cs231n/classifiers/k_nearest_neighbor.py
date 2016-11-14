@@ -50,7 +50,7 @@ class KNearestNeighbor(object):
     def compute_distances_two_loops(self, X):
         """
     Compute the distance between each test point in X and each training point
-    in self.X_train using a nested loop over both the training data and the 
+    in self.X_train using a nested loop over both the training data and the
     test data.
 
     Inputs:
@@ -138,7 +138,6 @@ class KNearestNeighbor(object):
         for i in xrange(num_test):
             # A list of length k storing the labels of the k nearest neighbors to
             # the ith test point.
-            closest_y = []
             #########################################################################
             # TODO:                                                                 #
             # Use the distance matrix to find the k nearest neighbors of the ith    #
@@ -146,7 +145,7 @@ class KNearestNeighbor(object):
             # neighbors. Store these labels in closest_y.                           #
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
-            pass
+            closest_y = self.y_train[np.argsort(dists[i])[:k]]
             #########################################################################
             # TODO:                                                                 #
             # Now that you have found the labels of the k nearest neighbors, you    #
@@ -154,7 +153,10 @@ class KNearestNeighbor(object):
             # Store this label in y_pred[i]. Break ties by choosing the smaller     #
             # label.                                                                #
             #########################################################################
-            pass
+            hist = sorted(zip(*np.unique(closest_y, return_counts=True)),
+                          key=lambda tup: tup[1],
+                          reverse=True)
+            y_pred[i] = hist[0][0]  # since it's reverse, it's breaking tie with smaller lable
             #########################################################################
             #                           END OF YOUR CODE                            # 
             #########################################################################
