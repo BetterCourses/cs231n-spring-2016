@@ -23,11 +23,11 @@ def svm_loss_naive(W, X, y, reg):
     dW = np.zeros(W.shape)  # initialize the gradient as zero
 
     # compute the loss and the gradient
-    num_classes = W.shape[1]
+    num_classes = W.shape[0]
     num_train = X.shape[0]
     loss = 0.0
     for i in xrange(num_train):
-        scores = X[i].dot(W)
+        scores = X[i].dot(W.T)
         correct_class_score = scores[y[i]]
         for j in xrange(num_classes):
             if j == y[i]:
@@ -54,6 +54,9 @@ def svm_loss_naive(W, X, y, reg):
 
     return loss, dW
 
+# note
+# 1. numpy array index trick: https://goo.gl/eqU8Yy
+# 2. SVM loss fn: http://cs231n.github.io/linear-classify/#svm
 
 def svm_loss_vectorized(W, X, y, reg):
     """
@@ -65,14 +68,25 @@ def svm_loss_vectorized(W, X, y, reg):
     dW = np.zeros(W.shape)  # initialize the gradient as zero
 
     #############################################################################
-    # TODO:                                                                     #
     # Implement a vectorized version of the structured SVM loss, storing the    #
     # result in loss.                                                           #
     #############################################################################
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+    m, n = X.shape
+    delta = 1
+
+    all_score = np.dot(X, W.T)  # (m, 10)
+
+    # for each row, get the right score from y
+    # and reshape it as column vectore
+    right_class_score = all_score[np.arange(m), y].reshape(m, 1)  
+
+    # 1. use broadcast to minus the right score, the right class will result 0 here
+    # 2. every score need to add a delta and max(0, score)
+    # 3. sum up for each row, and for each row, adjust the loss by minus delta of each row
+    #    since you didn't excluse the right class, so 1 extra delta is added for each row
+    # 4. np.mean -> sum up and divided by the size of X
+    loss = np.mean(np.maximum(0, all_score - right_class_score + delta).sum(axis=1) - delta)
+
 
     #############################################################################
     # TODO:                                                                     #
@@ -84,8 +98,6 @@ def svm_loss_vectorized(W, X, y, reg):
     # loss.                                                                     #
     #############################################################################
     pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+
 
     return loss, dW
