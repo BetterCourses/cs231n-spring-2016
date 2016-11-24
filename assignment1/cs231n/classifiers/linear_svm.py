@@ -98,7 +98,8 @@ def svm_loss_vectorized(W, X, y, reg):
     # to reuse some of the intermediate values that you used to compute the     #
     # loss.                                                                     #
     #############################################################################
-    binary = thresh > 0  # (m, 10)
+    binary = thresh  # (m, 10)
+    binary[thresh > 0] = 1
     counting = binary.sum(axis=1)
 
     # this way, the right class will have it's right negative counting, and the rest are 0/1
