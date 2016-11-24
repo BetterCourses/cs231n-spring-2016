@@ -10,7 +10,7 @@ def svm_loss_naive(W, X, y, reg):
     of N examples.
 
     Inputs:
-    - W: A numpy array of shape (D, C) containing weights.
+    - W: A numpy array of shape (C, D) containing weights.
     - X: A numpy array of shape (N, D) containing a minibatch of data.
     - y: A numpy array of shape (N,) containing training labels; y[i] = c means
       that X[i] has label c, where 0 <= c < C.
@@ -76,17 +76,22 @@ def svm_loss_vectorized(W, X, y, reg):
 
     all_score = np.dot(X, W.T)  # (m, 10)
 
-    # for each row, get the right score from y
-    # and reshape it as column vectore
+    # 1. for each row, get the right score from y
+    # 2. reshape it as column vector
     right_class_score = all_score[np.arange(m), y].reshape(m, 1)  
 
-    # 1. use broadcast to minus the right score, the right class will result 0 here
-    # 2. every score need to add a delta and max(0, score)
-    # 3. sum up for each row, and for each row, adjust the loss by minus delta of each row
-    #    since you didn't excluse the right class, so 1 extra delta is added for each row
-    # 4. np.mean -> sum up and divided by the size of X
-    loss = np.mean(np.maximum(0, all_score - right_class_score + delta).sum(axis=1) - delta)
+    # use broadcast to minus the right score + delta, the right class will be 1 here
+    mat = all_score - right_class_score + delta
 
+    # shouldn't count the right class
+    mat[np.arange(m), y] = 0
+
+    thresh = np.maximum(0, mat)  # (m, 10)
+
+    loss = thresh.sum() / m
+
+    # Add regularization to the loss.
+    loss += 0.5 * reg * np.sum(W * W)
 
     #############################################################################
     # TODO:                                                                     #
