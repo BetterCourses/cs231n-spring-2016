@@ -29,6 +29,7 @@ def svm_loss_naive(W, X, y, reg):
     for i in xrange(num_train):
         scores = X[i].dot(W.T)
         correct_class_score = scores[y[i]]
+        diff_cnt = 0
         for j in xrange(num_classes):
             if j == y[i]:
                 continue
@@ -37,8 +38,9 @@ def svm_loss_naive(W, X, y, reg):
                 loss += margin
                 
                 # if margin > 0, this is where gradient happens
-                dW[y[i],:] -= X[i, :] # this is really a sum over j != y_i
-                dW[j,:] += X[i, :] # sums each contribution of the x_i's
+                diff_cnt += 1
+                dW[j,:] += X[i] # sums each contribution of the x_i's
+        dW[y[i], :] -= diff_cnt * X[i]
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
@@ -47,13 +49,6 @@ def svm_loss_naive(W, X, y, reg):
     # Add regularization to the loss.
     loss += 0.5 * reg * np.sum(W * W)
 
-    #############################################################################
-    # Compute the gradient of the loss function and store it dW.                #
-    # Rather that first computing the loss and then computing the derivative,   #
-    # it may be simpler to compute the derivative at the same time that the     #
-    # loss is being computed. As a result you may need to modify some of the    #
-    # code above to compute the gradient.                                       #
-    #############################################################################
     dW /= num_train
     dW += reg * W
 
@@ -80,15 +75,15 @@ def svm_loss_vectorized(W, X, y, reg):
 
     # 1. for each row, get the right score from y
     # 2. reshape it as column vector
-    right_class_score = all_score[np.arange(m), y].reshape(m, 1)  
+    right_class_score = all_score[np.arange(m), y].reshape(m, 1)
 
     # use broadcast to minus the right score + delta, the right class will be 1 here
-    mat = all_score - right_class_score + delta
+    margin = all_score - right_class_score + delta
 
     # shouldn't count the right class
-    mat[np.arange(m), y] = 0
+    margin[np.arange(m), y] = 0
 
-    thresh = np.maximum(0, mat)  # (m, 10)
+    thresh = np.maximum(0, margin)  # (m, 10)
 
     loss = thresh.sum() / m
 
@@ -106,13 +101,12 @@ def svm_loss_vectorized(W, X, y, reg):
     binary = thresh > 0  # (m, 10)
     counting = binary.sum(axis=1)
 
-    # this way, the right class will have it's right negative counting, and the rest are 0/1 
+    # this way, the right class will have it's right negative counting, and the rest are 0/1
     binary[np.arange(m), y] = -counting
 
     # this is the matrix math I dont fully comprehend, feels right
     dW = np.dot(binary.T, X) / m
 
-    # Gradient regularization that carries through per https://piazza.com/class/i37qi08h43qfv?cid=118
     dW += reg * W
 
     return loss, dW
