@@ -37,7 +37,7 @@ def softmax_loss_naive(W, X, y, reg):
 
     return loss, dW
 
-
+# http://cs231n.github.io/neural-networks-case-study/#grad
 def softmax_loss_vectorized(W, X, y, reg):
     """
     Softmax loss function, vectorized version.
@@ -51,20 +51,18 @@ def softmax_loss_vectorized(W, X, y, reg):
     dW = np.zeros_like(W)
     N = X.shape[0]
 
-    score = X.dot(W.T)  # (N, C)
+    f_k = X.dot(W.T)  # (N, C)
 
     # numerical stability implementation
-    score -= np.amax(score, axis=1).reshape(N, 1)
+    f_k -= np.amax(f_k, axis=1).reshape(N, 1)
 
-    exp_score = np.exp(score)
+    e_fk = np.exp(f_k)  # (N, C)
 
-    ef_yi = exp_score[np.arange(N), y]  # right class score, (N, )
-    assert ef_yi.shape == (N, )
+    e_fsum = e_fk.sum(axis=1)  # sum of all exp score, (N, )
 
-    ef_sum = exp_score.sum(axis=1)  # sum of all class, (N, )
-    assert ef_sum.shape == (N, )
+    p_k = e_fk / e_fsum.reshape(N, 1)  # (N, C)
 
-    p_yi = ef_yi / ef_sum
+    p_yi = p_k[np.arange(N), y]
 
     loss = np.mean(-np.log(p_yi))
     loss += 0.5 * reg * np.sum(W * W)  # regularization
