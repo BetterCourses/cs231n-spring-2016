@@ -43,11 +43,19 @@ def softmax_loss_vectorized(W, X, y, reg):
     Softmax loss function, vectorized version.
 
     Inputs and outputs are the same as softmax_loss_naive.
+
+    For numerical stability:
+    we should shift the values inside the vector score so that the
+    highest value in each row is zero
     """
     dW = np.zeros_like(W)
     N = X.shape[0]
 
     score = X.dot(W.T)  # (N, C)
+
+    # numerical stability implementation
+    score -= np.amax(score, axis=1).reshape(N, 1)
+
     exp_score = np.exp(score)
 
     ef_yi = exp_score[np.arange(N), y]  # right class score, (N, )
@@ -58,8 +66,8 @@ def softmax_loss_vectorized(W, X, y, reg):
 
     p_yi = ef_yi / ef_sum
 
-    loss = np.sum(-np.log(p_yi)) / N
-    loss += 0.5 * reg * np.sum(W * W)
+    loss = np.mean(-np.log(p_yi))
+    loss += 0.5 * reg * np.sum(W * W)  # regularization
 
 
     return loss, dW
