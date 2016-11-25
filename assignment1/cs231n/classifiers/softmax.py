@@ -38,7 +38,7 @@ def softmax_loss_naive(W, X, y, reg):
     return loss, dW
 
 # http://cs231n.github.io/neural-networks-case-study/#grad
-def softmax_loss_vectorized(W, X, y, reg):
+def softmax_loss_vectorized(W, X, y, reg, debug=False):
     """
     Softmax loss function, vectorized version.
 
@@ -64,8 +64,22 @@ def softmax_loss_vectorized(W, X, y, reg):
 
     p_yi = p_k[np.arange(N), y]
 
+
     loss = np.mean(-np.log(p_yi))
     loss += 0.5 * reg * np.sum(W * W)  # regularization
 
+    dscores = p_k
+    dscores[np.arange(N), y] -= 1
+    dscores /= N
 
-    return loss, dW
+    dW = dscores.T.dot(X)
+    dW += reg * W
+
+    if debug:
+        print('e_fk shape = {}'.format(e_fk.shape))
+        print('p_k shape = {}'.format(p_k.shape))
+        print('dscores shape = {}'.format(dscores.shape))
+        print('dW shape = {}'.format(dW.shape))
+
+    
+    return loss, p_k
