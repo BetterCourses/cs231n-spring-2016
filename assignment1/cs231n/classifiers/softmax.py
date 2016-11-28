@@ -5,7 +5,7 @@ from random import shuffle
 def softmax_loss_naive(W, X, y, reg):
     """
     adapted from https://goo.gl/zfRtLr
-    
+
     Softmax loss function, naive implementation (with loops)
 
     Inputs have dimension D, there are C classes, and we operate on minibatches
@@ -75,7 +75,6 @@ def softmax_loss_vectorized(W, X, y, reg, debug=False):
     we should shift the values inside the vector score so that the
     highest value in each row is zero
     """
-    dW = np.zeros_like(W)
     N = X.shape[0]
 
     # compute class score
