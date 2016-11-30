@@ -33,7 +33,8 @@ def softmax_loss_naive(W, X, y, reg):
         # Compute vector of scores
         f_i = W.dot(X[i, :]) # in R^{num_classes}
 
-        # Normalization trick to avoid numerical instability, per http://cs231n.github.io/linear-classify/#softmax
+        # Normalization trick to avoid numerical instability
+        # per http://cs231n.github.io/linear-classify/#softmax
         log_c = np.max(f_i)
         f_i -= log_c
 
@@ -100,6 +101,12 @@ def softmax_loss_vectorized(W, X, y, reg, debug=False):
     dscores = p_k
     dscores[np.arange(N), y] -= 1
     dscores /= N
+
+    # since score = X @ W.T
+    # now we have gradient back -> dscore, we need to times it to local gradient
+    # which is d (X @ W.T) / d W -> X
+    # so work on dscore @ X, do the dimension analysis
+    # then we figure out it should be dscore.T @ X
 
     dW = np.dot(dscores.T, X)
 
