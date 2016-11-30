@@ -93,7 +93,7 @@ def softmax_loss_vectorized(W, X, y, reg, debug=False):
     # compute the loss
     p_yi = p_k[np.arange(N), y]
     loss = np.mean(-np.log(p_yi))
-    loss += 0.5 * reg * np.sum(W * W)  # regularization
+    loss += 0.5 * reg * np.sum(W * W)  # L2 regularization
 
 
     # backprop pass
@@ -102,6 +102,8 @@ def softmax_loss_vectorized(W, X, y, reg, debug=False):
     dscores /= N
 
     dW = np.dot(dscores.T, X)
+
+    # regularization backprop contribution to gradient
     dW += reg * W
 
     if debug:
