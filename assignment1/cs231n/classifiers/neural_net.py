@@ -156,7 +156,7 @@ class TwoLayerNet(object):
 
         for it in xrange(num_iters):
             # choose batch
-            batch_choice = np.random.choice(num_train, batch_size)
+            batch_choice = np.random.choice(num_train, batch_size)  # with replacement
             X_batch = X[batch_choice]
             y_batch = y[batch_choice]
 
@@ -210,6 +210,15 @@ class TwoLayerNet(object):
         the elements of X. For all i, y_pred[i] = c means that X[i] is predicted
         to have class c, where 0 <= c < C.
         """
-        y_pred = None
+        # get weights
+        W1, b1 = self.params['W1'], self.params['b1']
+        W2, b2 = self.params['W2'], self.params['b2']
+
+        # Compute the forward pass score
+        hidden_layer = np.maximum(0, np.dot(X, W1) + b1)  # (N, D)@(D, H) = (N, H)
+        scores = np.dot(hidden_layer, W2) + b2  # (N, H)@(H, C) = (N, C)
+
+
+        y_pred = np.argmax(scores, axis=1)
 
         return y_pred
