@@ -68,34 +68,22 @@ class TwoLayerNet(object):
         N, D = X.shape
 
         # Compute the forward pass
-        scores = None
-        #############################################################################
-        # TODO: Perform the forward pass, computing the class scores for the input. #
-        # Store the result in the scores variable, which should be an array of      #
-        # shape (N, C).                                                             #
-        #############################################################################
-        pass
-        #############################################################################
-        #                              END OF YOUR CODE                             #
-        #############################################################################
+        hidden_layer = np.maximum(0, np.dot(X, W1) + b1)  # (N, D)@(D, H) = (N, H)
+        scores = np.dot(hidden_layer, W2) + b2  # (N, H)@(H, C) = (N, C)
 
         # If the targets are not given then jump out, we're done
         if y is None:
             return scores
 
-        # Compute the loss
-        loss = None
-        #############################################################################
-        # TODO: Finish the forward pass, and compute the loss. This should include  #
-        # both the data loss and L2 regularization for W1 and W2. Store the result  #
-        # in the variable loss, which should be a scalar. Use the Softmax           #
-        # classifier loss. So that your results match ours, multiply the            #
-        # regularization loss by 0.5                                                #
-        #############################################################################
-        pass
-        #############################################################################
-        #                              END OF YOUR CODE                             #
-        #############################################################################
+        # Compute the loss, softmax cross entropy loss 
+        exp_scores = np.exp(scores)
+        probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+
+        data_loss_i = -np.log(probs[np.arange(N), y])
+        data_loss = np.mean(data_loss_i)
+        reg_loss = 0.5 * reg * (np.sum(W1*W1) + np.sum(W2*W2))
+
+        loss = data_loss + reg_loss
 
         # Backward pass: compute gradients
         grads = {}
