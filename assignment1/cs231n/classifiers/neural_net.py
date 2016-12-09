@@ -75,7 +75,7 @@ class TwoLayerNet(object):
         if y is None:
             return scores
 
-        # Compute the loss, softmax cross entropy loss 
+        # Compute the loss, softmax cross entropy loss
         exp_scores = np.exp(scores)
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
@@ -88,14 +88,33 @@ class TwoLayerNet(object):
         # Backward pass: compute gradients
         grads = {}
         #############################################################################
-        # TODO: Compute the backward pass, computing the derivatives of the weights #
+        # Compute the backward pass, computing the derivatives of the weights       #
         # and biases. Store the results in the grads dictionary. For example,       #
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
-        pass
-        #############################################################################
-        #                              END OF YOUR CODE                             #
-        #############################################################################
+        dscores = probs
+        dscores[np.arange(N), y] -= 1
+        dscores /= N
+
+        dW2 = np.dot(hidden_layer.T, dscores)
+        db2 = np.sum(dscores, axis=0, keepdims=True)
+
+        dhidden = np.dot(dscores, W2.T)  # (N, C)@(H, C).T -> (N, H)
+
+        drelu = dhidden.copy()
+        drelu[hidden_layer <= 0] = 0
+
+        dW1 = np.dot(X.T, drelu)  # (N, D).T@(N, H) -> (D, H)
+        db1 = np.sum(drelu, axis=0, keepdims=True)
+
+        # regularization gradient = reg*W
+        dW2 += reg*W2
+        dW1 += reg*W1
+
+        grads['W1'] = dW1
+        grads['W2'] = dW2
+        grads['b1'] = db1
+        grads['b2'] = db2
 
         return loss, grads
 
