@@ -102,25 +102,26 @@ class TwoLayerNet(object):
         data_loss, dx = softmax_loss(scores, y)  # got softmax gradient here
         loss = data_loss + 0.5 * self.reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
 
-		# start backprop, affine 2 layer
+        # start backprop, affine 2 layer
         dx_affine2, dW2, db2 = affine_backward(dx, output_cache)
         dW2 += self.reg * W2  # l2 backprop
         # we don't do regularization on b, so no l2 backprop to b
 
-		# relu layer
+        # relu layer
         dx_relu = relu_backward(dx_affine2, relu_cache)
 
-		# affine 1 layer
+        # affine 1 layer
         _, dW1, db1 = affine_backward(dx_relu, affine_cache)
         dW1 += self.reg * W1  # l2 backprop
-
 
         grads = dict([('W1', dW1), ('b1', db1), ('W2', dW2), ('b2', db2)])
 
         return loss, grads
 
 # NOTE: now you now why GPU memory is a bottleneck to decide the batch size
-# all those caches needed for backprop have to be in the memory for the whole epoch
+# all those caches needed for backprop have to be in the memory for the
+# whole epoch
+
 
 class FullyConnectedNet(object):
     """
@@ -180,10 +181,16 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to one and shift      #
         # parameters should be initialized to zero.                                #
         #######################################################################
-        pass
-        #######################################################################
-        #                             END OF YOUR CODE                             #
-        #######################################################################
+        dim_array = np.concatenate(
+            [[input_dim], hidden_dims, [num_classes]], axis=0)
+
+        for i in range(1, self.num_layers + 1):
+            self.params['W{}'.format(i)] = weight_scale * \
+                np.random.randn(dim_array[i - 1], dim_array[i])
+            self.params['b{}'.format(i)] = np.zeros(dim_array[i])
+            # if self.use_batchnorm:
+            #     self.params['gamma{}'.format(i)] = np.ones(dim_array[i])
+            #     self.params['beta{}'.format(i)] = np.zeros(dim_array[i])
 
         # When using dropout we need to pass a dropout_param dictionary to each
         # dropout layer so that the layer knows the dropout probability and the mode
