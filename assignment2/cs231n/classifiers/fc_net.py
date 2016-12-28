@@ -185,8 +185,7 @@ class FullyConnectedNet(object):
             [[input_dim], hidden_dims, [num_classes]], axis=0)
 
         for i in range(1, self.num_layers + 1):
-            self.params['W{}'.format(i)] = weight_scale * \
-                np.random.randn(dim_array[i - 1], dim_array[i])
+            self.params['W{}'.format(i)] = weight_scale * np.random.randn(dim_array[i - 1], dim_array[i])
             self.params['b{}'.format(i)] = np.zeros(dim_array[i])
             # if self.use_batchnorm:
             #     self.params['gamma{}'.format(i)] = np.ones(dim_array[i])
@@ -245,16 +244,49 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         #######################################################################
-        pass
-        #######################################################################
-        #                             END OF YOUR CODE                             #
-        #######################################################################
+        X_reshape = X.reshape(X.shape[0], -1)
+        last_output = X_reshape  # this is the first input
+        reg_loss = 0
+        caches = {}
+        
+        # all side effects, * will be used in backprop:
+            # scores
+            # loss
+            # *dx
+            # *caches
 
+        for i in range(1, self.num_layers+1):
+            # a repeat process of forward, record cache
+            Wi, bi = self.params.get('W{}'.format(i)), self.params.get('b{}'.format(i))
+            affine_out, affine_cache = affine_forward(last_output, Wi, bi)
+            
+            reg_loss += 0.5 * self.reg * np.sum(Wi * Wi)  # regularization
+
+            caches['affine_cache{}'.format(i)] = affine_cache
+
+            if i == self.num_layers:  # handle last affine-softmax layer
+                scores = affine_out
+                data_loss, dx = softmax_loss(scores, y)
+                loss = data_loss + reg_loss
+                break  # no need to continue the rest of loop
+            
+            last_output = affine_out  # update last_output pointer
+
+            if self.use_batchnorm:
+                pass
+            
+            relu_out, relu_cache = relu_forward(last_output)
+            caches['relu_cache{}'.format(i)] = relu_cache
+
+            last_output = relu_out  # update last_output pointer
+
+            if self.use_dropout:
+                pass
+        
         # If test mode return early
         if mode == 'test':
             return scores
 
-        loss, grads = 0.0, {}
         #######################################################################
         # TODO: Implement the backward pass for the fully-connected net. Store the #
         # loss in the loss variable and gradients in the grads dictionary. Compute #
@@ -268,9 +300,29 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         #######################################################################
-        pass
-        #######################################################################
-        #                             END OF YOUR CODE                             #
-        #######################################################################
+        grads = {}
+        last_grad = dx
+        
+        for i in range(1, self.num_layers+1)[::-1]:  # reverse order
+        # a process of backprop, record gradients
+            if i != self.num_layers:
+                if self.use_dropout:
+                    pass
+                
+                relu_cache = caches.get('relu_cache{}'.format(i))
+                drelu = relu_backward(last_grad, relu_cache)
+                last_grad = drelu
+
+                if self.use_batchnorm:
+                    pass
+
+            affine_cache = caches.get('affine_cache{}'.format(i))
+            daffine, dwi, dbi = affine_backward(last_grad, affine_cache)            
+            
+            dwi += self.reg * self.params.get('W{}'.format(i))  # regularization backprop
+            
+            grads['W{}'.format(i)] = dwi
+            grads['b{}'.format(i)] = dbi
+            last_grad = daffine
 
         return loss, grads
