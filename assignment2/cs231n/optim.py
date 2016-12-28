@@ -99,10 +99,9 @@ def rmsprop(x, dx, config=None):
   # in the next_x variable. Don't forget to update cache value stored in      #  
   # config['cache'].                                                          #
   #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+  cache = config['decay_rate'] * config['cache'] + (1 - config['decay_rate']) * (dx * dx)
+  next_x = x - config['learning_rate']*dx / (np.sqrt(cache) + config['epsilon'])
+  config['cache'] = cache
 
   return next_x, config
 
@@ -128,18 +127,24 @@ def adam(x, dx, config=None):
   config.setdefault('epsilon', 1e-8)
   config.setdefault('m', np.zeros_like(x))
   config.setdefault('v', np.zeros_like(x))
-  config.setdefault('t', 0)
+  config.setdefault('t', 1)
   
-  next_x = None
   #############################################################################
   # TODO: Implement the Adam update formula, storing the next value of x in   #
   # the next_x variable. Don't forget to update the m, v, and t variables     #
   # stored in config.                                                         #
   #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+  m = config['beta1']*config['m'] + (1-config['beta1'])*dx
+  v = config['beta2']*config['v'] + (1-config['beta2'])*(dx*dx)
+  mb = m/(1-config['beta1']**config['t'])
+  vb = v/(1-config['beta2']**config['t'])
+
+  next_x = x - config['learning_rate'] * mb / (np.sqrt(vb) + config['epsilon'])
+
+  config['m'] = m
+  config['v'] = v
+  config['t'] += 1
+
   
   return next_x, config
 
