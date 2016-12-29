@@ -148,10 +148,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # the momentum variable to update the running mean and running variance,    #
         # storing your result in the running_mean and running_var variables.        #
         #######################################################################
-        pass
-        #######################################################################
-        #                             END OF YOUR CODE                              #
-        #######################################################################
+        batch_mean = x.mean(axis=0)
+        batch_var = x.var(axis=0)
+        normalized_x = (x - batch_mean) / np.sqrt(batch_var + eps)
+        bn_x = gamma*normalized_x + beta
+        out = bn_x
+
+        running_mean = momentum*running_mean + (1- momentum)*batch_mean
+        running_var = momentum*running_var + (1- momentum)*batch_var
     elif mode == 'test':
         #######################################################################
         # TODO: Implement the test-time forward pass for batch normalization. Use   #
@@ -159,10 +163,9 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # and shift the normalized data using gamma and beta. Store the result in   #
         # the out variable.                                                         #
         #######################################################################
-        pass
-        #######################################################################
-        #                             END OF YOUR CODE                              #
-        #######################################################################
+        normalized_x = (x - running_mean) / np.sqrt(running_var + eps)
+        out = gamma*normalized_x + beta
+        
     else:
         raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
 
