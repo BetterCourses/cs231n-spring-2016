@@ -133,7 +133,6 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
     running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
 
-    out, cache = None, None
     if mode == 'train':
         #######################################################################
         # TODO: Implement the training-time forward pass for batch normalization.   #
@@ -173,6 +172,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     bn_param['running_mean'] = running_mean
     bn_param['running_var'] = running_var
 
+    cache = (x, gamma, beta)
     return out, cache
 
 
